@@ -2,7 +2,7 @@
 
 base ← ⊑ •args ∾ 2⋆52
 ! 1=•Type base ⋄ ! (⌊⊸=∧2⊸≤) base
-l2b ← (base=2⊸⋆)⊸× 2⋆⁼base  # 0 if not a power of two
+l2b ← (base=2⊸⋆)⊸× ⌊2⋆⁼base  # 0 if not a power of two
 ! (⌈∘√⊸×⍟(0=l2b) base) ≤ 2⋆53
 
 _while_ ← {𝔽⍟𝔾∘𝔽_𝕣_𝔾∘𝔽⍟𝔾𝕩}
