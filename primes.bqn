@@ -20,30 +20,25 @@ wlen ← ≠primes
   seg ← 2⋆18                   # Maximum segment size
   wl ← ×´primes                # Wheel length
   mask ← ∧´(wl⥊0<↕)¨primes     # Positions not divisible by a prime
-  wn ← +´mask
-  em ← (wl + ⌈seg÷next) ⥊ mask # Extended mask (not much longer)
+  # The extended wheel spans an extra ⌈seg÷next entries to let selections
+  # run off the end instead of wrapping around
+  em ← (wl + ⌈seg÷next) ⥊ mask # Extended mask
   ms ← +`em                    # Indices into wheel
   w ← /em                      # Extended wheel
 
   # Get prime mask on segment [start,end) with prime divisors pd
   # Assumes pd doesn't intersect primes, or [start,end)
-  bca ← eca ← ↕0 # cache
-  _sieveCache ⇐ {pd cache _𝕣 start‿end:
-    bc‿ec ← {cache? bca‿eca ; ⋈˜↕0}
-    da ← (start-1) ⌊∘÷ (≠bc)↓pd  # Smallest coefficients to mark off
-    b ← bc ∾ ba ← wl × da ⌊∘÷ wl # Wheel index for those
-    e ← ec ∾ (da-ba) ⊏ ms        # Start position in wheel
-    f ← (b -˜ (end-1)⌊∘÷pd) ⊏ ms # End position, may run past end of wheel
-    {cache? inc←wn≤f ⋄ bca↩b+wl×inc ⋄ eca↩f-wn×inc ; @} # Next b and e
-
-    r ← f-e                      # Number to mark off
-    k ← ↕∘≠⊸+r/f-+`r             # Wheel positions
+  Sieve ⇐ {pd 𝕊 start‿end:
+    d ← ⌊(𝕩-1)÷⌜pd             # Start and end coefficients to mark off
+    b ← wl × (⊏d) ⌊∘÷ wl       # Round start down to nearest wheel
+    [e,f] ← (d -⎉1 b) ⊏ ms     # As indices into extended wheel
+    r ← f-e                    # Number of indices
+    k ← ↕∘≠⊸+r/f-+`r           # Full wheel index list
     i ← (r/pd) × (r/b) + k⊏w
     0¨⌾((i-start)⊸⊏) (end-start)⥊start⌽mask
   }
-  Sieve ⇐ 0 _sieveCache
 
-  AddSeg ← {primes ∾↩ (⊑𝕩) + / (wlen↓𝕨↑primes) 1 _sieveCache 𝕩 ⋄ @}
+  AddSeg ← {primes ∾↩ (⊑𝕩) + / (wlen↓𝕨↑primes) Sieve 𝕩 ⋄ @}
   Extend ⇐ {
     𝕩 ≤ next ? @ ;
     req ← 𝕩 ⌊ sq ← ×˜ next
